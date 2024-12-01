@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eux
+
+sudo apt update
+
+sudo apt install \
+git \
+curl \
+wget \
+tree \
+silversearcher-ag \
+fd-find \
+neovim \
+fish \
+mosh \
+-y

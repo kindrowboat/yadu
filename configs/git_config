@@ -1,0 +1,11 @@
+[user]
+	name = Stef Dunlap
+	email = hello@kindrobot.ca
+
+[core]
+	editor = name
+
+[alias]
+	ci = commit
+	co = checkout
+	s = status

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eux
+
+DOTS_ROOT=$(git rev-parse --show-toplevel)
+
+sudo apt install $DOTS_ROOT/assets/deb-get_0.4.3-1_all.deb
+
+sudo deb-get install vivaldi-stable code

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -eux
+
+sudo apt update
+
+sudo apt install \
+alacritty \
+keepassxc \
+-y
