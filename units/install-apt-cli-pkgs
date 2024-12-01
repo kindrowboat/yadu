@@ -5,13 +5,14 @@ set -eux
 sudo apt update
 
 sudo apt install \
-git \
 curl \
-wget \
-tree \
-silversearcher-ag \
 fd-find \
-neovim \
 fish \
+git \
 mosh \
+neovim \
+silversearcher-ag \
+trash-cli \
+tree \
+wget \
 -y

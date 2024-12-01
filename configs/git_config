@@ -9,3 +9,4 @@
 	ci = commit
 	co = checkout
 	s = status
+	cich = commit -m "changes"
