@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Description of the unit
+description() {
+    echo "Description d"
+}
+
+# Dependencies for the unit (space-separated list)
+dependencies() {
+    echo "c a"
+}
+
+# Main logic of the unit
+main() {
+    echo "running d"
+}
+
+# Ensure main function runs if the script is called directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

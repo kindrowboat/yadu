@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Install GUI packages"
+}
+
+dependencies() {
+    echo "apt-update"
+}
+
+main() {
+    sudo apt install \
+    alacritty \
+    chromium-browser \
+    -y
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Install and set the FantasqueSansMono Nerd Font in KDE Plasma"
+}
+
+dependencies() {
+    echo ""
+}
+
+main() {
+    DOTS_ROOT=$(git rev-parse --show-toplevel)
+
+    # Font file location
+    sudo cp $DOTS_ROOT=assets/FantasqueSansMono/*.ttf /usr/share/fonts
+    fc-cache -f -v
+
+    # Set the font as the default in KDE Plasma
+    kwriteconfig6 --group General --key fixed "FantasqueSansM Nerd Font Mono,13,-1,5,50,0,0,0,0,0"
+    kwriteconfig6 --group General --key font "FantasqueSansM Nerd Font,13,-1,5,50,0,0,0,0,0"
+    kwriteconfig6 --group General --key menuFont "FantasqueSansM Nerd Font,13,-1,5,50,0,0,0,0,0"
+    kwriteconfig6 --group General --key smallestReadableFont "FantasqueSansM Nerd Font,12,-1,5,50,0,0,0,0,0"
+    kwriteconfig6 --group General --key toolBarFont "FantasqueSansM Nerd Font,13,-1,5,50,0,0,0,0,0"
+
+    # Restart Plasma to apply the changes
+    plasmashell --replace &
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

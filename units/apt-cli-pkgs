@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Install apt CLI packages"
+}
+
+dependencies() {
+    echo "apt-update"
+}
+
+main() {
+    sudo apt install \
+    curl \
+    fd-find \
+    fish \
+    git \
+    mosh \
+    neovim \
+    silversearcher-ag \
+    trash-cli \
+    tree \
+    wget \
+    -y
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

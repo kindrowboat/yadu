@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -eux
-
-DOTS_ROOT=$(git rev-parse --show-toplevel)
-
-mkdir -p $HOME/.ssh
-ln -fs $DOTS_ROOT/configs/ssh_config $HOME/.ssh/config

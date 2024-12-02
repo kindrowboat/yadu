@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Install keepassxc"
+}
+
+dependencies() {
+    echo "apt-update"
+}
+
+main() {
+    sudo apt install keepassxc -y
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

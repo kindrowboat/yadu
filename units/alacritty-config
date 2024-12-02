@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Link alacritty config"
+}
+
+dependencies() {
+    echo ""
+}
+
+main() {
+    set -eux
+
+    DOTS_ROOT=$(git rev-parse --show-toplevel)
+
+    mkdir -p $HOME/.config/alacritty
+    ln -fs $DOTS_ROOT/configs/alacritty.toml $HOME/.config/alacritty/alacritty.toml
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

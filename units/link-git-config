@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -eux
-
-DOTS_ROOT=$(git rev-parse --show-toplevel)
-
-ln -fs $DOTS_ROOT/configs/git_config $HOME/.gitconfig

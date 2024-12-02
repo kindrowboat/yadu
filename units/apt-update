@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Update apt packages"
+}
+
+dependencies() {
+    echo ""
+}
+
+main() {
+    sudo apt update
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi
