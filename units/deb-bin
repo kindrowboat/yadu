@@ -5,7 +5,7 @@ description() {
 }
 
 dependencies() {
-    echo "apt update"
+    echo "apt-update"
 }
 
 main() {
@@ -15,6 +15,7 @@ main() {
 
     sudo deb-get install \
       code \
+      slack-desktop \
       vivaldi-stable
 }
 

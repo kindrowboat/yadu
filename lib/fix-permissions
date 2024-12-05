@@ -15,4 +15,5 @@ find ./units ./lib -type f -exec chmod 755 {} \;
 # Set all other files to 644
 find . -type f \( ! -path "./units/*" ! -path "./lib/*" \) -exec chmod 644 {} \;
 
+chmod +x dots
 

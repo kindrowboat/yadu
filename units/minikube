@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Install minikube"
+}
+
+dependencies() {
+    echo "docker kube-utils"
+}
+
+main() {
+    cd $(mktemp -d)
+    wget https://github.com/kubernetes/minikube/releases/download/v1.34.0/minikube_1.34.0-0_amd64.deb
+    sudo apt install ./minikube_1.34.0-0_amd64.deb -y
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

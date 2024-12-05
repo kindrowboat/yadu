@@ -5,16 +5,20 @@ description() {
 }
 
 dependencies() {
-    echo ""
+    echo "apt-update"
 }
 
 main() {
     set -eux
 
     DOTS_ROOT=$(git rev-parse --show-toplevel)
-
+    sudo apt install -y alacritty
     mkdir -p $HOME/.config/alacritty
     ln -fs $DOTS_ROOT/configs/alacritty.toml $HOME/.config/alacritty/alacritty.toml
+    # add kde shortcut to launch alacritty
+    kwriteconfig5 --file ~/.config/kglobalshortcutsrc --group "Alacritty.desktop" --key "New" "Meta+Return,none,New Terminal"
+    # Restart Plasma to apply the changes
+    qdbus org.kde.KWin /KWin org.kde.KWin.reconfigure
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

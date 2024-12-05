@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-units_dir="./units"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+units_dir="$DIR/units"
 visited=()
 
 # Function to list all units and their descriptions
@@ -14,6 +15,7 @@ list_units() {
 
 # Function to resolve dependencies using Depth First Search (DFS)
 resolve_dependencies() {
+    set -eu
     local unit_name="$1"
     local unit_path="$units_dir/$unit_name"
 
@@ -48,5 +50,7 @@ if [[ $# -eq 0 ]]; then
 else
     # Argument provided: resolve dependencies and run the specified unit
     unit_to_run="$1"
+    # strip leading or "units/" if present
+    unit_to_run="${unit_to_run#units/}"
     resolve_dependencies "$unit_to_run"
 fi

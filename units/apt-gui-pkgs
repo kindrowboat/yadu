@@ -10,8 +10,7 @@ dependencies() {
 
 main() {
     sudo apt install \
-    alacritty \
-    chromium-browser \
+    chromium \
     -y
 }
 
