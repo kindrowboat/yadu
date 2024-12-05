@@ -10,18 +10,19 @@ dependencies() {
 
 main() {
     sudo apt install \
-    curl \
-    golang \
-    fd-find \
-    fish \
-    git \
-    mosh \
-    neovim \
-    silversearcher-ag \
-    trash-cli \
-    tree \
-    wget \
-    -y
+        curl \
+        golang \
+        fd-find \
+        fish \
+        git \
+        golang \
+        mosh \
+        neovim \
+        silversearcher-ag \
+        trash-cli \
+        tree \
+        wget \
+        -y
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
