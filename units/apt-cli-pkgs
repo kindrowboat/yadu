@@ -18,10 +18,13 @@ main() {
         golang \
         mosh \
         neovim \
+        php \
         silversearcher-ag \
         trash-cli \
         tree \
         wget \
+        libspa-0.2-bluetooth \
+        wl-clipboard \
         -y
 }
 

@@ -37,9 +37,13 @@ Host *.wmflabs *.wikimedia.cloud
     User kindrobot
     ProxyJump bastion.wmcloud.org:22
 
+Host gitlab.wikimedia.org
+    IdentityFile ~/.ssh/wmf_gitlab_ed25519.key
+
 Host town
     Hostname tilde.town
     User kindrobot
+    IdentityFile ~/.ssh/town_ed25519.key
     ForwardAgent yes
     AddressFamily inet
 
@@ -52,6 +56,10 @@ Host fans
     Hostname tilde.fans
     User kindrobot
     ForwardAgent yes
+
+Host github
+    Hostname github.com
+    IdentityFile ~/.ssh/github_ed25519.key
 
 Host home
     Hostname kindrobot.ca

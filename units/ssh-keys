@@ -16,11 +16,28 @@ main() {
 
     mkdir -p $HOME/.ssh
 
-    # Function to clean up the tkemporary file
+    # cleanup
+    # clean up the temporary key file
     cleanup() {
         rm -f "$TEMP_KEY_FILE"
     }
     trap cleanup EXIT
+
+    # key_path FILE_NAME
+    key_path() {
+        echo "$HOME/.ssh/$1"
+    }
+
+    # export_public_key KEEPASS_ENTRY FILE_NAME
+    export_public_key() {
+        keepassxc-cli attachment-export --key-file "$TEMP_KEY_FILE" --no-password $DATABASE "$1" "$2" $(key_path "$2")
+    }
+
+    # export_private_key KEEPASS_ENTRY FILE_NAME
+    export_private_key() {
+        export_public_key "$1" "$2"
+        chmod 600 $(key_path "$2")
+    }
 
     # Prompt the user for the KeePass master password
     read -sp "Enter KeePass master password: " KEEPASS_PASSWORD
@@ -28,12 +45,20 @@ main() {
     printf "$KEEPASS_PASSWORD" > "$TEMP_KEY_FILE"
 
     # Unlock the KeePass database and store the temporary unlock key
-    keepassxc-cli attachment-export --key-file "$TEMP_KEY_FILE" --no-password $DATABASE "Secure notes/id_ed25519 personal key stef@kindrobot.ca" id_ed25519 $HOME/.ssh/id_ed25519
-    chmod 600 $HOME/.ssh/id_ed25519
-    keepassxc-cli attachment-export --key-file "$TEMP_KEY_FILE" --no-password $DATABASE "Secure notes/id_ed25519 personal key stef@kindrobot.ca" id_ed25519.pub $HOME/.ssh/id_ed25519.pub
-    keepassxc-cli attachment-export --key-file "$TEMP_KEY_FILE" --no-password $DATABASE "Wikimedia/Wikipedia Prod Keys" wmf_prod.key $HOME/.ssh/wmf_prod.key
-    chmod 600 $HOME/.ssh/wmf_prod.key
-    keepassxc-cli attachment-export --key-file "$TEMP_KEY_FILE" --no-password $DATABASE "Wikimedia/Wikipedia Prod Keys" wmf_prod.pub $HOME/.ssh/wmf_prod.pub
+    export_private_key "Secure notes/id_ed25519 personal key stef@kindrobot.ca" "id_ed25519"
+    export_public_key  "Secure notes/id_ed25519 personal key stef@kindrobot.ca" "id_ed25519.pub"
+    
+    export_private_key "Wikimedia/Wikipedia Prod Keys" "wmf_prod.key"
+    export_public_key  "Wikimedia/Wikipedia Prod Keys" "wmf_prod.pub"
+
+    export_private_key "Tildeverse/tilde.town keys" "town_ed25519.key"
+    export_public_key  "Tildeverse/tilde.town keys" "town_ed25519.key.pub"
+
+    export_private_key "Eng/github keys" "github_ed25519.key"
+    export_public_key  "Eng/github keys" "github_ed25519.key.pub"
+
+    export_private_key "Wikimedia/WMF Gitlab Key" "wmf_gitlab_ed25519.key"
+    export_public_key  "Wikimedia/WMF Gitlab Key" "wmf_gitlab_ed25519.key.pub"
 
     # Verify if the database was unlocked successfully
     if [ $? -ne 0 ]; then
