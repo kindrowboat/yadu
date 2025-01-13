@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+# A script that lists SSH private keys from ~/.ssh, lets you choose one,
+# and then runs ssh-add against it with an 8-hour timeout.
+
+# Gather candidate private key files (exclude anything ending in .pub).
+# Note: If you have keys with non-standard names in .ssh, this will catch them 
+#       as long as they are not directories and not named *.pub.
+keys=( $(find ~/.ssh -maxdepth 1 -type f ! -name "*.pub" ! -name "known_hosts" ! -name "known_hosts.old" -exec basename {} \;) )
+
+# If an argument is provided, filter keys to only those containing the argument as a substring.
+if [[ -n "$1" ]]; then
+  keys=( $(printf "%s\n" "${keys[@]}" | grep "$1") )
+fi
+
+# If no private keys are found after filtering, exit.
+if [ ${#keys[@]} -eq 0 ]; then
+  echo "No private keys found in ~/.ssh matching '$1'"
+  exit 1
+fi
+
+# If only one key is found after filtering, add it without prompting.
+if [ ${#keys[@]} -eq 1 ]; then
+  echo "Only one key found: ${keys[0]}"
+  echo "Adding ~/.ssh/${keys[0]} for 8 hours..."
+  ssh-add -t 8h ~/.ssh/"${keys[0]}"
+  exit 0
+fi
+
+echo "Available SSH private keys in ~/.ssh:" # Present a numbered menu of key filenames.
+select key in "${keys[@]}"; do
+  if [[ -n "$key" ]]; then
+    # Run ssh-add on the chosen key with an 8-hour timeout.
+    echo "Adding ~/.ssh/$key for 8 hours..."
+    ssh-add -t 8h ~/.ssh/"$key"
+    exit 0
+  else
+    echo "Invalid selection. Please try again."
+  fi
+done
+

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Install latest golang"
+}
+
+dependencies() {
+    echo "wget-curl"
+}
+
+main() {
+    set -eu
+    DOTS_ROOT=$(git rev-parse --show-toplevel)
+    temp_dir=$(mktemp -d)
+    cd $temp_dir
+    wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz
+    sudo rm -rf /usr/local/go 
+    sudo tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz
+
+    sudo cp $DOTS_ROOT/configs/go-path.sh /etc/profile.d/go-path.sh
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

@@ -59,6 +59,9 @@ main() {
 
     export_private_key "Wikimedia/WMF Gitlab Key" "wmf_gitlab_ed25519.key"
     export_public_key  "Wikimedia/WMF Gitlab Key" "wmf_gitlab_ed25519.key.pub"
+    
+    export_private_key "Wikimedia/WMF CloudVPS keys" "wmf_cloudvps_ed25519.key"
+    export_public_key  "Wikimedia/WMF CloudVPS keys" "wmf_cloudvps_ed25519.key.pub"
 
     # Verify if the database was unlocked successfully
     if [ $? -ne 0 ]; then

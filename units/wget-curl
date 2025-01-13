@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+description() {
+    echo "Install wget and curl"
+}
+
+dependencies() {
+    echo "apt-update"
+}
+
+main() {
+    sudo apt install wget curl -y
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi

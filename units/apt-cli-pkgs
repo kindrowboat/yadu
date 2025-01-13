@@ -11,11 +11,10 @@ dependencies() {
 main() {
     sudo apt install \
         curl \
-        golang \
         fd-find \
         fish \
         git \
-        golang \
+        make \
         mosh \
         neovim \
         php \

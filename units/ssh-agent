@@ -1,19 +1,17 @@
 #!/usr/bin/env bash
 
 description() {
-    echo "Link git config"
+    echo 'set up $SSH_AUTH_SOCK'
 }
 
 dependencies() {
-    echo ""
+    echo "profile-home"
 }
 
 main() {
     set -eu
-
     DOTS_ROOT=$(git rev-parse --show-toplevel)
-
-    ln -fs $DOTS_ROOT/configs/git_config $HOME/.gitconfig
+    ln -sf $DOTS_ROOT/configs/home-profile.d/ssh-agent $HOME/.profile.d/ssh-agent
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

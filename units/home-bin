@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 description() {
-    echo "Link git config"
+    echo "link home bin"
 }
 
 dependencies() {
@@ -13,7 +13,7 @@ main() {
 
     DOTS_ROOT=$(git rev-parse --show-toplevel)
 
-    ln -fs $DOTS_ROOT/configs/git_config $HOME/.gitconfig
+    ln -fs $DOTS_ROOT/assets/bin $HOME/bin
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

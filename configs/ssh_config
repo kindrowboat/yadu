@@ -9,38 +9,40 @@ Match host "*.wikimedia.org,*.wmnet"
     PasswordAuthentication no
     User kindrobot
 
-# Configure the initial connection to the bastion host, with the one
-# HostName closest to you.
+# geographically prefered bastion for WMF production deploy servers
 Host bast
     HostName bast1003.wikimedia.org
     IdentityFile ~/.ssh/wmf_prod.key
-    # In theory this User line shouldn't be necessary due to the Match above,
-    # but in practice it seems to be.  In any case, it doesn't hurt.
     User kindrobot
 
-# Proxy all connections to internal servers through the bastion host.
+# defaults for any other WMF production bastions we might encounter
+Host bast*.wikimedia.org
+    IdentityFile ~/.ssh/wmf_prod.key
+
+# WMF deployment production servers, routed through a bastion
 Host *.wmnet *.wikimedia.org !gerrit.wikimedia.org !bast*.wikimedia.org !gitlab.wikimedia.org
     ProxyJump bast
     IdentityFile ~/.ssh/wmf_prod.key
 
-# Configure direct connection to the bastion hosts.
-Host bast*.wikimedia.org
-    IdentityFile ~/.ssh/wmf_prod.key
 
+# wikimedia's gerrit
 Host gerrit.wikimedia.org
     Port 29418
 
+# WMF CloudVPS access (including toolforge)
 Host *.wmflabs.org *.wmcloud.org *.toolforge.org
     User kindrobot
+    IdentityFile ~/.ssh/wmf_cloudvps_ed25519.key
 
 Host *.wmflabs *.wikimedia.cloud
     User kindrobot
     ProxyJump bastion.wmcloud.org:22
+    IdentityFile ~/.ssh/wmf_cloudvps_ed25519.key
 
 Host gitlab.wikimedia.org
     IdentityFile ~/.ssh/wmf_gitlab_ed25519.key
 
-Host town
+Host tilde.town
     Hostname tilde.town
     User kindrobot
     IdentityFile ~/.ssh/town_ed25519.key
@@ -52,13 +54,7 @@ Host team
     User kindrobot
     ForwardAgent yes
 
-Host fans
-    Hostname tilde.fans
-    User kindrobot
-    ForwardAgent yes
-
-Host github
-    Hostname github.com
+Host github.com
     IdentityFile ~/.ssh/github_ed25519.key
 
 Host home
