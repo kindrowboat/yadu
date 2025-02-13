@@ -49,6 +49,51 @@ var listCmd = &cobra.Command{
 	},
 }
 
+var editCmd = &cobra.Command{
+	Use:   "edit [unit]",
+	Short: "Edit a specific unit",
+	Args:  cobra.ExactArgs(1),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		context, err := loadContext()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		units, err := context.GetUnitsAndDescriptions()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		// Extract just the unit names
+		validUnits := make([]string, len(units))
+		for i, unit := range units {
+			validUnits[i] = unit[0]
+		}
+
+		return validUnits, cobra.ShellCompDirectiveNoFileComp
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		context, err := loadContext()
+		if err != nil {
+			return err
+		}
+		unitName := args[0]
+		unitFile := context.GetUnitFileName(unitName)
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			editor = "vi"
+		}
+		editCmd := exec.Command(editor, unitFile)
+		editCmd.Stdin = os.Stdin
+		editCmd.Stdout = os.Stdout
+		editCmd.Stderr = os.Stderr
+		if err := editCmd.Run(); err != nil {
+			return fmt.Errorf("failed to open editor: %v", err)
+		}
+		return nil
+	},
+}
+
 var applyCmd = &cobra.Command{
 	Use:   "apply [unit]",
 	Short: "Apply a specific unit",
@@ -168,6 +213,7 @@ func init() {
 	rootCmd.AddCommand(contextCmd)
 	rootCmd.AddCommand(newUnitCmd)
 	newUnitCmd.Flags().BoolP("edit", "e", false, "Open the new unit in the editor")
+	rootCmd.AddCommand(editCmd)
 }
 
 func main() {
