@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"os/exec"
 	"text/template"
 
 	"github.com/kindrowboat/yadu/internal/config"
@@ -52,6 +53,25 @@ var applyCmd = &cobra.Command{
 	Use:   "apply [unit]",
 	Short: "Apply a specific unit",
 	Args:  cobra.ExactArgs(1),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		context, err := loadContext()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		units, err := context.GetUnitsAndDescriptions()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		// Extract just the unit names
+		validUnits := make([]string, len(units))
+		for i, unit := range units {
+			validUnits[i] = unit[0]
+		}
+
+		return validUnits, cobra.ShellCompDirectiveNoFileComp
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		context, err := loadContext()
 		if err != nil {
@@ -92,6 +112,7 @@ var newUnitCmd = &cobra.Command{
 	Short: "Create a new unit",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		edit, _ := cmd.Flags().GetBool("edit")
 		context, err := loadContext()
 		if err != nil {
 			return err
@@ -121,10 +142,23 @@ var newUnitCmd = &cobra.Command{
 		)
 		if err != nil {
 			return err
-		} else {
-			fmt.Println(unitName)
-			return nil
 		}
+
+		// Open the new unit in the editor if the flag is set
+		if edit {
+			editor := os.Getenv("EDITOR")
+			if editor == "" {
+				editor = "vi"
+			}
+			cmd := exec.Command(editor, unitFile)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("failed to open editor: %v", err)
+			}
+		}
+		return nil
 	},
 }
 
@@ -133,6 +167,7 @@ func init() {
 	rootCmd.AddCommand(applyCmd)
 	rootCmd.AddCommand(contextCmd)
 	rootCmd.AddCommand(newUnitCmd)
+	newUnitCmd.Flags().BoolP("edit", "e", false, "Open the new unit in the editor")
 }
 
 func main() {

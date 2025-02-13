@@ -1,0 +1,21 @@
+#!/bin/bash
+
+description() {
+    echo "the foo"
+}
+
+# Dependencies: List any dependencies (space separated) this unit has
+dependencies() {
+    echo ""
+}
+
+# Main function: The main logic of the unit
+main() {
+    echo "TODO: Implement the main function"
+    exit 1
+}
+
+# Execute the main function if called directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi
