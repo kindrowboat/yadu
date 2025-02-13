@@ -1,13 +1,18 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
+	"text/template"
 
 	"github.com/kindrowboat/yadu/internal/config"
 	"github.com/kindrowboat/yadu/pkg/context"
 	"github.com/spf13/cobra"
 )
+
+//go:embed templates/unit.tmpl
+var unitTemplate string
 
 func loadContext() (*context.Context, error) {
 	cfg, err := config.LoadConfig()
@@ -82,10 +87,52 @@ var contextCmd = &cobra.Command{
 	},
 }
 
+var newUnitCmd = &cobra.Command{
+	Use:   "new-unit [name]",
+	Short: "Create a new unit",
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		context, err := loadContext()
+		if err != nil {
+			return err
+		}
+		unitName := args[0]
+		unitDescription := args[1]
+
+		// create the unit file using the template
+		tmpl, err := template.New("unit").Parse(unitTemplate)
+		if err != nil {
+			return fmt.Errorf("failed to parse unit template: %v", err)
+		}
+		unitFile := context.GetUnitFileName(unitName)
+		f, err := os.Create(unitFile)
+		if err != nil {
+			return fmt.Errorf("failed to create unit file: %v", err)
+		}
+		defer f.Close()
+		err = tmpl.Execute(f,
+			struct {
+				Name        string
+				Description string
+			}{
+				Name:        unitName,
+				Description: unitDescription,
+			},
+		)
+		if err != nil {
+			return err
+		} else {
+			fmt.Println(unitName)
+			return nil
+		}
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(applyCmd)
 	rootCmd.AddCommand(contextCmd)
+	rootCmd.AddCommand(newUnitCmd)
 }
 
 func main() {

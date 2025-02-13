@@ -54,7 +54,7 @@ func (c Context) getUnitsDir() string {
 	return filepath.Join(c.directory, "units")
 }
 
-func (c Context) getUnitFile(unitName string) string {
+func (c Context) GetUnitFileName(unitName string) string {
 	return filepath.Join(c.getUnitsDir(), unitName)
 }
 
@@ -80,7 +80,7 @@ func (c *Context) AddUnit(name string) (*unit, error) {
 		return unit, nil
 	}
 	// create a new unit
-	unit := &unit{name: name, file: c.getUnitFile(name), hasRun: false}
+	unit := &unit{name: name, file: c.GetUnitFileName(name), hasRun: false}
 	// add dependencies
 	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("source %s && dependencies", unit.file))
 	deps, err := cmd.Output()
