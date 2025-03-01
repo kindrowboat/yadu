@@ -207,6 +207,27 @@ var newUnitCmd = &cobra.Command{
 	},
 }
 
+var initCmd = &cobra.Command{
+	Use:   "init [directory]",
+	Short: "Initialize a new context and set it as the current context",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		directory := args[0]
+		cfg, err := config.LoadConfig()
+		// create the new directory and sub dirctories
+		err = os.MkdirAll(directory, 0755)
+		if err != nil {
+			return fmt.Errorf("failed to create directory: %v", err)
+		}
+		err = os.MkdirAll(fmt.Sprintf("%s/units", directory), 0755)
+		if err != nil {
+			return fmt.Errorf("failed to load config: %v", err)
+		}
+		cfg.SetContext(directory)
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(applyCmd)
