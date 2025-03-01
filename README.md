@@ -1,8 +1,9 @@
-Collecting workspace information
-
 # YADU - Yet Another Dotfiles Utility
 
-YADU is a simple, powerful dotfiles management tool that helps you organize and apply your configuration files in a modular way.
+YADU is a simple, powerful dotfiles management tool that helps you organize and
+apply your configuration files in a modular way.
+
+Example dot files repo: [kindrowboat/dots](https://github.com/kindrowboat/dots)
 
 ## Features
 
