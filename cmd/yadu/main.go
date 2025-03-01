@@ -153,7 +153,7 @@ var contextCmd = &cobra.Command{
 }
 
 var newUnitCmd = &cobra.Command{
-	Use:   "new-unit [name]",
+	Use:   "new-unit [name] \"[description]\"",
 	Short: "Create a new unit",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
