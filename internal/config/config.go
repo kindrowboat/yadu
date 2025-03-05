@@ -37,18 +37,21 @@ func LoadConfig() (Config, error) {
 		if os.IsNotExist(err) {
 			return cfg, nil
 		}
-		return cfg, err
+		return cfg, fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	err = toml.Unmarshal(data, &cfg)
-	return cfg, err
+	if err != nil {
+		return cfg, fmt.Errorf("failed to parse config file: %w", err)
+	}
+	return cfg, nil
 }
 
 func (cfg *Config) SetContext(contextPath string) error {
 	// get full path for context path
 	absPath, err := filepath.Abs(contextPath)
 	if err != nil {
-		return fmt.Errorf("failed to get absolute path for context: %v", err)
+		return fmt.Errorf("failed to get absolute path for context: %w", err)
 	}
 	cfg.Context = absPath
 	return cfg.save()
@@ -57,7 +60,7 @@ func (cfg *Config) SetContext(contextPath string) error {
 func (cfg Config) save() error {
 	configPath, err := getConfigPath()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get config path: %w", err)
 	}
 
 	data, err := toml.Marshal(cfg)

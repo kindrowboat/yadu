@@ -18,16 +18,21 @@ var unitTemplate string
 func loadContext() (*context.Context, error) {
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load config: %v", err)
+		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
-	return context.HydrateContext(cfg.Context)
+	ctx, err := context.HydrateContext(cfg.Context)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hydrate context: %w", err)
+	}
+	return ctx, nil
 }
 
 // Cobra commands
 var rootCmd = &cobra.Command{
-	Use:   "yadu",
-	Short: "Yet Another Dotfiles Utility",
+	Use:          "yadu",
+	Short:        "Yet Another Dotfiles Utility",
+	SilenceUsage: true,
 }
 
 var listCmd = &cobra.Command{
@@ -160,7 +165,7 @@ var newUnitCmd = &cobra.Command{
 		edit, _ := cmd.Flags().GetBool("edit")
 		context, err := loadContext()
 		if err != nil {
-			return err
+			return fmt.Errorf("couldn't load context: %w", err)
 		}
 		unitName := args[0]
 		unitDescription := args[1]
@@ -228,6 +233,43 @@ var initCmd = &cobra.Command{
 	},
 }
 
+// Update the environment command
+var environmentCmd = &cobra.Command{
+	Use:   "environment [environment_name]",
+	Short: "Apply all units in the specified environment",
+	Args:  cobra.ExactArgs(1),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		ctx, err := loadContext()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		// Get available environments
+		environments, err := ctx.LoadEnvironments()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		// Return environment names for autocomplete
+		envNames := make([]string, len(environments))
+		for i, env := range environments {
+			envNames[i] = env.Name
+		}
+
+		return envNames, cobra.ShellCompDirectiveNoFileComp
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		environmentName := args[0]
+
+		ctx, err := loadContext()
+		if err != nil {
+			return fmt.Errorf("couldn't load context: %w", err)
+		}
+
+		return ctx.ApplyEnvironment(environmentName)
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(applyCmd)
@@ -235,6 +277,7 @@ func init() {
 	rootCmd.AddCommand(newUnitCmd)
 	newUnitCmd.Flags().BoolP("edit", "e", false, "Open the new unit in the editor")
 	rootCmd.AddCommand(editCmd)
+	rootCmd.AddCommand(environmentCmd)
 }
 
 func main() {
