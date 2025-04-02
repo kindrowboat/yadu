@@ -128,7 +128,8 @@ var applyCmd = &cobra.Command{
 			return err
 		}
 		unitName := args[0]
-		err = context.RunUnit(unitName, true)
+		only, _ := cmd.Flags().GetBool("only")
+		err = context.RunUnit(unitName, !only)
 		if err != nil {
 			return err
 		}
@@ -219,6 +220,9 @@ var initCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		directory := args[0]
 		cfg, err := config.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load config: %v", err)
+		}
 		// create the new directory and sub dirctories
 		err = os.MkdirAll(directory, 0755)
 		if err != nil {
@@ -389,15 +393,17 @@ func init() {
 	environmentCmd.AddCommand(environmentSetCmd)
 	environmentCmd.AddCommand(environmentApplyCmd)
 	environmentCmd.AddCommand(environmentListCmd)
+	rootCmd.AddCommand(environmentCmd)
+
+	applyCmd.Flags().BoolP("only", "o", false, "Only apply the specified unit (not dependencies)")
+	rootCmd.AddCommand(applyCmd)
 
 	// Add commands to root
 	rootCmd.AddCommand(listCmd)
-	rootCmd.AddCommand(applyCmd)
 	rootCmd.AddCommand(contextCmd)
 	rootCmd.AddCommand(newUnitCmd)
 	newUnitCmd.Flags().BoolP("edit", "e", false, "Open the new unit in the editor")
 	rootCmd.AddCommand(editCmd)
-	rootCmd.AddCommand(environmentCmd)
 	rootCmd.AddCommand(initCmd)
 }
 
