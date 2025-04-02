@@ -196,6 +196,7 @@ func (c *Context) RunUnit(name string) error {
 	cmd.Dir = c.directory // Set working directory to context directory
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("execution of '%s' failed: %w", unit.name, err)
 	}
