@@ -128,7 +128,7 @@ var applyCmd = &cobra.Command{
 			return err
 		}
 		unitName := args[0]
-		err = context.RunUnit(unitName)
+		err = context.RunUnit(unitName, true)
 		if err != nil {
 			return err
 		}

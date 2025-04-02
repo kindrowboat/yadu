@@ -68,7 +68,7 @@ func (c *Context) ApplyEnvironment(environmentName string) error {
 	fmt.Printf("Applying environment: \x1b[1;94m%s\x1b[0m\n", environmentName)
 	for _, unitName := range targetEnv.Units {
 		fmt.Printf("Applying unit from environment: %s\n", unitName)
-		if err := c.RunUnit(unitName); err != nil {
+		if err := c.RunUnit(unitName, true); err != nil {
 			return fmt.Errorf("failed to apply unit '%s': %w", unitName, err)
 		}
 	}
@@ -85,7 +85,7 @@ func HydrateContext(directory string) (*Context, error) {
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			unitName := entry.Name()
-			_, err := c.AddUnit(unitName)
+			_, err := c.LoadUnit(unitName)
 			if err != nil {
 				return nil, fmt.Errorf("failed to add unit %s: %w", unitName, err)
 			}
@@ -136,7 +136,7 @@ func (u unit) GetDescription() (string, error) {
 	return string(desc), nil
 }
 
-func (c *Context) AddUnit(name string) (*unit, error) {
+func (c *Context) LoadUnit(name string) (*unit, error) {
 	// if the unit already exists, return it
 	if unit, ok := c.units[name]; ok {
 		return unit, nil
@@ -144,16 +144,11 @@ func (c *Context) AddUnit(name string) (*unit, error) {
 	// create a new unit
 	unit := &unit{name: name, file: c.GetUnitFileName(name), hasRun: false}
 
-	// add dependencies
-	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("source %s && dependencies", unit.file))
-
-	// Create pipes for stdout and stderr
+	get_deps := exec.Command("/bin/bash", "-c", fmt.Sprintf("source %s && dependencies", unit.file))
 	var stdout, stderr strings.Builder
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	// Run the command
-	err := cmd.Run()
+	get_deps.Stdout = &stdout
+	get_deps.Stderr = &stderr
+	err := get_deps.Run()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dependencies for %s: stderr: %s: %w",
 			unit.name, stderr.String(), err)
@@ -161,7 +156,7 @@ func (c *Context) AddUnit(name string) (*unit, error) {
 
 	// Process dependencies from stdout
 	for _, dep := range strings.Fields(stdout.String()) {
-		depUnit, err := c.AddUnit(dep)
+		depUnit, err := c.LoadUnit(dep)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add dependency %s for unit %s: %w", dep, name, err)
 		}
@@ -173,7 +168,7 @@ func (c *Context) AddUnit(name string) (*unit, error) {
 	return unit, nil
 }
 
-func (c *Context) RunUnit(name string) error {
+func (c *Context) RunUnit(name string, run_deps bool) error {
 	unit, ok := c.units[name]
 	if !ok {
 		return fmt.Errorf("unit %s not found", name)
@@ -184,10 +179,12 @@ func (c *Context) RunUnit(name string) error {
 		return nil
 	}
 
-	// Run dependencies first
-	for _, dep := range unit.dependencies {
-		if err := c.RunUnit(dep.name); err != nil {
-			return err
+	if run_deps {
+		// Run dependencies first
+		for _, dep := range unit.dependencies {
+			if err := c.RunUnit(dep.name, true); err != nil {
+				return err
+			}
 		}
 	}
 
