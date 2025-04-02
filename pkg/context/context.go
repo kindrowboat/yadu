@@ -173,30 +173,33 @@ func (c *Context) AddUnit(name string) (*unit, error) {
 	return unit, nil
 }
 
-func (u *unit) Run() error {
-	if u.hasRun {
-		return nil
-	}
-	for _, dep := range u.dependencies {
-		if err := dep.Run(); err != nil {
-			return err
-		}
-	}
-	fmt.Printf("\x1b[1;97m===== \x1b[1;94m%s\x1b[1;97m =====\x1b[0m\n", u.name)
-	cmd := exec.Command("/bin/bash", u.file)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("execution of '%s' failed: %v", u.name, err)
-	}
-	u.hasRun = true
-	return nil
-}
-
 func (c *Context) RunUnit(name string) error {
 	unit, ok := c.units[name]
 	if !ok {
 		return fmt.Errorf("unit %s not found", name)
 	}
-	return unit.Run()
+
+	// If unit has already been run, skip it
+	if unit.hasRun {
+		return nil
+	}
+
+	// Run dependencies first
+	for _, dep := range unit.dependencies {
+		if err := c.RunUnit(dep.name); err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("\x1b[1;97m===== \x1b[1;94m%s\x1b[1;97m =====\x1b[0m\n", unit.name)
+	cmd := exec.Command("/bin/bash", unit.file)
+	cmd.Dir = c.directory // Set working directory to context directory
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("execution of '%s' failed: %w", unit.name, err)
+	}
+
+	unit.hasRun = true
+	return nil
 }

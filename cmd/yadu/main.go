@@ -233,10 +233,35 @@ var initCmd = &cobra.Command{
 	},
 }
 
-// Update the environment command
+// Environment command with subcommands
 var environmentCmd = &cobra.Command{
-	Use:   "environment [environment_name]",
-	Short: "Apply all units in the specified environment",
+	Use:   "env",
+	Short: "Manage environments",
+	Long:  "Commands for managing and applying environments",
+}
+
+var environmentGetCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Display the current environment",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg, err := config.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load config: %w", err)
+		}
+
+		if cfg.Environment == "" {
+			fmt.Println("No environment selected")
+		} else {
+			fmt.Println(cfg.Environment)
+		}
+		return nil
+	},
+}
+
+var environmentSetCmd = &cobra.Command{
+	Use:   "set [environment_name]",
+	Short: "Set the current environment",
 	Args:  cobra.ExactArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx, err := loadContext()
@@ -244,13 +269,11 @@ var environmentCmd = &cobra.Command{
 			return nil, cobra.ShellCompDirectiveError
 		}
 
-		// Get available environments
 		environments, err := ctx.LoadEnvironments()
 		if err != nil {
 			return nil, cobra.ShellCompDirectiveError
 		}
 
-		// Return environment names for autocomplete
 		envNames := make([]string, len(environments))
 		for i, env := range environments {
 			envNames[i] = env.Name
@@ -261,16 +284,113 @@ var environmentCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		environmentName := args[0]
 
+		// Verify environment exists
 		ctx, err := loadContext()
 		if err != nil {
 			return fmt.Errorf("couldn't load context: %w", err)
 		}
 
-		return ctx.ApplyEnvironment(environmentName)
+		environments, err := ctx.LoadEnvironments()
+		if err != nil {
+			return fmt.Errorf("failed to load environments: %w", err)
+		}
+
+		found := false
+		for _, env := range environments {
+			if env.Name == environmentName {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("environment '%s' not found", environmentName)
+		}
+
+		cfg, err := config.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load config: %w", err)
+		}
+
+		return cfg.SetSelectedEnvironment(environmentName)
+	},
+}
+
+var environmentApplyCmd = &cobra.Command{
+	Use:   "apply",
+	Short: "Apply the current environment",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Get selected environment from config
+		cfg, err := config.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load config: %w", err)
+		}
+
+		if cfg.Environment == "" {
+			return fmt.Errorf("no environment selected, use 'yadu environment set [environment_name]' to select one")
+		}
+
+		// Load context and apply the environment
+		ctx, err := loadContext()
+		if err != nil {
+			return fmt.Errorf("couldn't load context: %w", err)
+		}
+
+		return ctx.ApplyEnvironment(cfg.Environment)
+	},
+}
+
+var environmentListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List available environments",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx, err := loadContext()
+		if err != nil {
+			return fmt.Errorf("couldn't load context: %w", err)
+		}
+
+		environments, err := ctx.LoadEnvironments()
+		if err != nil {
+			return fmt.Errorf("failed to load environments: %w", err)
+		}
+
+		if len(environments) == 0 {
+			fmt.Println("No environments found")
+			return nil
+		}
+
+		// Get currently selected environment for highlighting
+		cfg, err := config.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load config: %w", err)
+		}
+
+		fmt.Println("Available environments:")
+		for _, env := range environments {
+			if env.Name == cfg.Environment {
+				// Highlight the current environment
+				fmt.Printf("  \x1b[1;92m*\x1b[0m \x1b[1;94m%s\x1b[0m (%d units)\n",
+					env.Name, len(env.Units))
+			} else {
+				fmt.Printf("    \x1b[1;94m%s\x1b[0m (%d units)\n",
+					env.Name, len(env.Units))
+			}
+		}
+
+		return nil
 	},
 }
 
 func init() {
+	// Add environment subcommands
+	environmentCmd.AddCommand(environmentGetCmd)
+	environmentCmd.AddCommand(environmentSetCmd)
+	environmentCmd.AddCommand(environmentApplyCmd)
+	environmentCmd.AddCommand(environmentListCmd)
+
+	// Add commands to root
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(applyCmd)
 	rootCmd.AddCommand(contextCmd)
@@ -278,6 +398,7 @@ func init() {
 	newUnitCmd.Flags().BoolP("edit", "e", false, "Open the new unit in the editor")
 	rootCmd.AddCommand(editCmd)
 	rootCmd.AddCommand(environmentCmd)
+	rootCmd.AddCommand(initCmd)
 }
 
 func main() {

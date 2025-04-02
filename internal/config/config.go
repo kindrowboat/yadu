@@ -10,7 +10,8 @@ import (
 
 // Add type for config
 type Config struct {
-	Context string `toml:"context"`
+	Context     string `toml:"context"`
+	Environment string `toml:"environment"`
 }
 
 func getConfigPath() (string, error) {
@@ -47,14 +48,14 @@ func LoadConfig() (Config, error) {
 	return cfg, nil
 }
 
-func (cfg *Config) SetContext(contextPath string) error {
-	// get full path for context path
-	absPath, err := filepath.Abs(contextPath)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute path for context: %w", err)
-	}
-	cfg.Context = absPath
-	return cfg.save()
+func (c *Config) SetContext(context string) error {
+	c.Context = context
+	return c.save()
+}
+
+func (c *Config) SetSelectedEnvironment(env string) error {
+	c.Environment = env
+	return c.save()
 }
 
 func (cfg Config) save() error {
